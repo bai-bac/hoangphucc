@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>🔥 BACCARAT AI ULTRA</title>
+<title>🎯 Baccarat Timing Tool</title>
 
 <style>
 body{
@@ -13,82 +13,52 @@ body{
   text-align:center;
 }
 
-/* HEADER */
 .header{
-  background:linear-gradient(to right,#0d2b4d,#1f5fa3);
-  padding:18px;
-  font-size:22px;
+  background:#0d2b4d;
+  padding:15px;
+  font-size:20px;
   font-weight:bold;
 }
 
-/* BUTTON */
 .wrap{
   display:flex;
   justify-content:center;
-  gap:12px;
-  margin:20px;
+  gap:10px;
+  margin:15px;
 }
 
 .btn{
   flex:1;
   padding:18px;
   border:none;
-  border-radius:18px;
+  border-radius:15px;
   font-size:18px;
   font-weight:bold;
   color:#fff;
 }
 
-.blue{
-  background:#1e88e5;
-  box-shadow:0 0 20px #1e88e5;
-}
+.blue{background:#1e88e5;}
+.red{background:#e53935;}
+.green{background:#43a047;}
 
-.red{
-  background:#e53935;
-  box-shadow:0 0 20px #e53935;
-}
-
-.green{
-  background:#43a047;
-  box-shadow:0 0 20px #43a047;
-}
-
-/* BOX */
 .box{
-  background:#0f2a45;
-  margin:15px;
+  background:#10263f;
+  margin:10px;
   padding:15px;
-  border-radius:15px;
+  border-radius:12px;
 }
 
-/* RESULT */
 .result{
   font-size:22px;
-  font-weight:bold;
   margin-top:10px;
 }
 
-.sub{
-  font-size:14px;
-  opacity:0.7;
-}
-
-/* STATS */
-.stats{
-  display:flex;
-  justify-content:space-around;
-  margin-top:15px;
-  font-size:18px;
-}
-
-/* GRID */
 .grid{
   display:grid;
   grid-template-columns: repeat(12, 22px);
-  gap:6px;
+  gap:5px;
   justify-content:center;
-  margin-top:15px;
+  margin-top:10px;
 }
 
 .cell{
@@ -97,26 +67,30 @@ body{
   border-radius:50%;
 }
 
-/* FOOT */
-.footer{
-  margin:20px;
-}
-
-.btn2{
-  padding:12px 25px;
-  border:none;
-  border-radius:12px;
-  margin:5px;
-  font-size:16px;
-}
-
-/* WARN */
 .warn{
   background:#ff9800;
   color:#000;
-  padding:10px;
-  border-radius:10px;
+  padding:8px;
+  border-radius:8px;
   margin-top:10px;
+}
+
+.good{
+  background:#4CAF50;
+  padding:8px;
+  border-radius:8px;
+  margin-top:10px;
+}
+
+.bad{
+  background:#f44336;
+  padding:8px;
+  border-radius:8px;
+  margin-top:10px;
+}
+
+.footer{
+  margin:15px;
 }
 
 </style>
@@ -124,33 +98,25 @@ body{
 
 <body>
 
-<div class="header">🔥 BACCARAT AI ULTRA</div>
+<div class="header">🎯 TOOL TIMING CHUẨN</div>
 
 <div class="wrap">
-  <button class="btn blue" onclick="add('P')">XANH<br>(PLAYER)</button>
-  <button class="btn green" onclick="add('T')">XANH LÁ<br>(TIE)</button>
-  <button class="btn red" onclick="add('B')">ĐỎ<br>(BANKER)</button>
+  <button class="btn blue" onclick="add('P')">XANH</button>
+  <button class="btn green" onclick="add('T')">HOÀ</button>
+  <button class="btn red" onclick="add('B')">ĐỎ</button>
 </div>
 
 <div class="box">
-  🤖 AI ĐANG PHÂN TÍCH...
-  <div class="result" id="result">⏳ CHỜ THÊM DỮ LIỆU</div>
-  <div class="sub">Nhập kết quả để AI dự đoán chính xác hơn</div>
-
-  <div class="stats">
-    <div style="color:#1e88e5">XANH <br><span id="p">0%</span></div>
-    <div style="color:#e53935">ĐỎ <br><span id="b">0%</span></div>
-    <div style="color:#ffeb3b">BỆT <br><span id="streak">0</span></div>
-  </div>
-
-  <div id="warn"></div>
+  🤖 PHÂN TÍCH THỜI ĐIỂM
+  <div id="result" class="result">⏳ CHỜ DỮ LIỆU</div>
+  <div id="note"></div>
 </div>
 
 <div class="grid" id="grid"></div>
 
 <div class="footer">
-  <button class="btn2" onclick="undo()">↩️ Hoàn tác</button>
-  <button class="btn2" onclick="reset()">🔄 Reset</button>
+  <button onclick="undo()">↩️ Undo</button>
+  <button onclick="reset()">🔄 Reset</button>
 </div>
 
 <script>
@@ -162,7 +128,7 @@ function save(){
 
 function add(x){
   data.push(x);
-  if(data.length>120)data.shift();
+  if(data.length>100)data.shift();
   save();
   render();
 }
@@ -179,61 +145,70 @@ function reset(){
   render();
 }
 
+/* 🔥 TOOL TIMING */
 function analyze(){
-  let last=data.slice(-20);
 
-  let p=last.filter(x=>x=="P").length;
-  let b=last.filter(x=>x=="B").length;
-  let total=p+b;
+  let clean = data.filter(x=>x!="T");
 
-  if(total==0)return [0,0,"⏳ CHỜ THÊM",0,""];
-
-  let pp=Math.round(p/total*100);
-  let bb=100-pp;
+  if(clean.length < 5){
+    return ["⏳ CHỜ THÊM","", "bad"];
+  }
 
   /* streak */
-  let streak=1;
-  for(let i=data.length-1;i>0;i--){
-    if(data[i]==data[i-1]) streak++;
+  let streak = 1;
+  for(let i=clean.length-1;i>0;i--){
+    if(clean[i]==clean[i-1]) streak++;
     else break;
   }
 
-  let result="⏳ CHỜ";
-  let warn="";
+  let last = clean[clean.length-1];
 
-  if(streak>=4){
-    warn="⚠️ Cầu bệt "+streak+" → dễ gãy!";
-  }
-
-  if(pp>65){
-    result="🔥 XANH MẠNH (PLAYER)";
-  }
-  else if(bb>65){
-    result="🔥 ĐỎ MẠNH (BANKER)";
-  }
-  else if(streak>=3){
-    result="⚡ Theo cầu: "+(data[data.length-1]=="P"?"XANH":"ĐỎ");
+  /* cầu loạn */
+  let change = 0;
+  for(let i=1;i<clean.length;i++){
+    if(clean[i] != clean[i-1]) change++;
   }
 
-  return [pp,bb,result,streak,warn];
+  let chaos = change / clean.length;
+
+  /* 🚫 cầu loạn */
+  if(chaos > 0.6){
+    return ["🚫 CẦU LOẠN → NGHỈ","", "bad"];
+  }
+
+  /* 🚫 cuối chuỗi */
+  if(streak >= 4){
+    return ["⛔ CUỐI CẦU → KHÔNG VÀO","Dễ gãy", "bad"];
+  }
+
+  /* 🔥 đầu chuỗi đẹp */
+  if(streak == 2 || streak == 3){
+    return ["🔥 THEO CẦU " + last,"Đang đầu chuỗi", "good"];
+  }
+
+  /* 🎯 bắt gãy */
+  if(streak == 1 && clean.length > 3){
+    return ["🎯 BẮT GÃY " + (last=="P"?"ĐỎ":"XANH"),"Vừa đảo cầu", "good"];
+  }
+
+  return ["❌ BỎ","", "bad"];
 }
 
 function render(){
-  let [pp,bb,res,streak,warn]=analyze();
 
-  document.getElementById("p").innerText=pp+"%";
-  document.getElementById("b").innerText=bb+"%";
-  document.getElementById("streak").innerText=streak;
-  document.getElementById("result").innerText=res;
+  let [res,note,type]=analyze();
 
-  let w=document.getElementById("warn");
-  if(warn){
-    w.className="warn";
-    w.innerText=warn;
-  }else{
-    w.className="";
-    w.innerText="";
-  }
+  let r=document.getElementById("result");
+  let n=document.getElementById("note");
+
+  r.innerText=res;
+  n.innerText=note;
+
+  r.className="result";
+
+  if(type=="good") n.className="good";
+  else if(type=="bad") n.className="bad";
+  else n.className="warn";
 
   let grid=document.getElementById("grid");
   grid.innerHTML="";
