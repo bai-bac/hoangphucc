@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Baccarat AI App</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#050f1a;
+  color:#fff;
+}
+
+/* NAV */
+.nav{
+  display:flex;
+  justify-content:space-around;
+  background:#0d2b4d;
+  padding:10px;
+}
+.nav div{
+  cursor:pointer;
+}
+
+/* SCREEN */
+.screen{display:none; padding:10px;}
+.active{display:block}
+
+/* BUTTON */
+.btn{
+  padding:12px;
+  margin:5px;
+  border:none;
+  border-radius:10px;
+  width:90px;
+  color:#fff;
+}
+.b{background:#1976D2}
+.p{background:#D32F2F}
+.t{background:#388E3C}
+
+/* BOX */
+.box{
+  background:#0f243c;
+  margin:10px 0;
+  padding:10px;
+  border-radius:10px;
+}
+
+/* ROAD */
+.road{
+  display:grid;
+  grid-template-columns: repeat(20, 18px);
+  gap:3px;
+  justify-content:center;
+}
+.cell{
+  width:18px;
+  height:18px;
+  border-radius:50%;
+}
+
+/* TEXT */
+.big{font-size:24px;}
+.small{font-size:13px; opacity:0.8;}
+
+</style>
+</head>
+
+<body>
+
+<!-- NAV -->
+<div class="nav">
+  <div onclick="show('play')">🎯 Bàn</div>
+  <div onclick="show('stats')">📊 Stats</div>
+  <div onclick="show('settings')">⚙️ Setting</div>
+</div>
+
+<!-- PLAY -->
+<div id="play" class="screen active">
+
+<div class="big" id="last">--</div>
+
+<div>
+  <button class="btn b" onclick="add('B')">B</button>
+  <button class="btn t" onclick="add('T')">T</button>
+  <button class="btn p" onclick="add('P')">P</button>
+</div>
+
+<div class="box">
+  <div id="suggest"></div>
+  <div id="confidence" class="small"></div>
+  <div id="trend" class="small"></div>
+  <div id="money" class="small"></div>
+</div>
+
+<div class="road" id="road"></div>
+
+<div style="margin-top:10px">
+  <button onclick="undo()">Undo</button>
+  <button onclick="reset()">Reset</button>
+</div>
+
+</div>
+
+<!-- STATS -->
+<div id="stats" class="screen">
+  <div class="box">
+    <div id="total"></div>
+    <div id="rate"></div>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div id="settings" class="screen">
+  <div class="box">
+    Vốn cơ bản: <input id="bet" type="number" value="10">
+    <br><br>
+    <button onclick="saveSetting()">Lưu</button>
+  </div>
+</div>
+
+<script>
+let data = JSON.parse(localStorage.getItem("bac")||"[]");
+let base = Number(localStorage.getItem("bet")||10);
+
+/* NAV */
+function show(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+/* DATA */
+function save(){
+  localStorage.setItem("bac",JSON.stringify(data));
+}
+function add(x){
+  data.push(x);
+  if(data.length>200)data.shift();
+  save(); render();
+}
+function undo(){data.pop(); save(); render();}
+function reset(){data=[]; save(); render();}
+
+/* SETTINGS */
+function saveSetting(){
+  base = Number(document.getElementById("bet").value);
+  localStorage.setItem("bet",base);
+  alert("Đã lưu");
+}
+
+/* AI */
+function analyze(){
+  let clean=data.filter(x=>x!="T");
+  if(clean.length<6) return ["CHỜ",50,"--",0];
+
+  let b=clean.filter(x=>x=="B").length;
+  let p=clean.filter(x=>x=="P").length;
+
+  let pb=p/(b+p);
+  let bb=1-pb;
+
+  let streak=1;
+  for(let i=data.length-1;i>0;i--){
+    if(data[i]==data[i-1]) streak++;
+    else break;
+  }
+
+  let suggest="CHỜ";
+  let conf=Math.round(50+Math.abs(pb-bb)*40);
+  let trend=streak>=3?"TREND":"LOẠN";
+
+  if(conf>=70){
+    suggest=pb>bb?"PLAYER":"BANKER";
+  }else if(streak>=3){
+    suggest="THEO "+data[data.length-1];
+  }else{
+    suggest="BỎ";
+  }
+
+  let money=0;
+  if(conf>=70) money=base*2;
+  else if(conf>=60) money=base;
+
+  return [suggest,conf,trend,money];
+}
+
+/* ROAD */
+function renderRoad(){
+  let road=document.getElementById("road");
+  road.innerHTML="";
+  data.slice(-100).forEach(x=>{
+    let d=document.createElement("div");
+    d.className="cell";
+    if(x=="B") d.style.background="#2196F3";
+    if(x=="P") d.style.background="#f44336";
+    if(x=="T") d.style.background="#4CAF50";
+    road.appendChild(d);
+  });
+}
+
+/* RENDER */
+function render(){
+
+  document.getElementById("last").innerText=data[data.length-1]||"--";
+
+  let [s,c,t,m]=analyze();
+
+  document.getElementById("suggest").innerText="👉 "+s;
+  document.getElementById("confidence").innerText="Tin cậy: "+c+"%";
+  document.getElementById("trend").innerText="Xu hướng: "+t;
+  document.getElementById("money").innerText="Cược: "+(m?m+"k":"BỎ");
+
+  renderRoad();
+
+  /* stats */
+  let total=data.length;
+  let b=data.filter(x=>x=="B").length;
+  let p=data.filter(x=>x=="P").length;
+
+  document.getElementById("total").innerText="Tổng: "+total;
+  document.getElementById("rate").innerText="P "+p+" / B "+b;
+}
+
+render();
+</script>
+
+</body>
+</html>
