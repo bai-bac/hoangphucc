@@ -7,61 +7,117 @@
 <style>
 body{
   margin:0;
-  background:#06121f;
+  background:#071a2b;
   font-family:Arial;
   color:#fff;
   text-align:center;
 }
 
+/* HEADER */
 .header{
-  background:linear-gradient(to right,#0d2b4d,#1f4f7a);
-  padding:15px;
-  font-size:20px;
+  background:linear-gradient(to right,#0d2b4d,#1f5fa3);
+  padding:18px;
+  font-size:22px;
   font-weight:bold;
 }
 
 /* BUTTON */
+.wrap{
+  display:flex;
+  justify-content:center;
+  gap:12px;
+  margin:20px;
+}
+
 .btn{
+  flex:1;
   padding:18px;
-  margin:8px;
-  width:30%;
-  max-width:140px;
   border:none;
-  border-radius:14px;
-  color:#fff;
+  border-radius:18px;
   font-size:18px;
   font-weight:bold;
+  color:#fff;
 }
-.btn:active{transform:scale(0.95)}
-.b{background:#2196F3}
-.p{background:#f44336}
-.t{background:#4CAF50}
+
+.blue{
+  background:#1e88e5;
+  box-shadow:0 0 20px #1e88e5;
+}
+
+.red{
+  background:#e53935;
+  box-shadow:0 0 20px #e53935;
+}
+
+.green{
+  background:#43a047;
+  box-shadow:0 0 20px #43a047;
+}
 
 /* BOX */
 .box{
-  background:#0f243c;
-  margin:10px;
-  padding:12px;
-  border-radius:12px;
+  background:#0f2a45;
+  margin:15px;
+  padding:15px;
+  border-radius:15px;
 }
 
-/* ROAD */
+/* RESULT */
+.result{
+  font-size:22px;
+  font-weight:bold;
+  margin-top:10px;
+}
+
+.sub{
+  font-size:14px;
+  opacity:0.7;
+}
+
+/* STATS */
+.stats{
+  display:flex;
+  justify-content:space-around;
+  margin-top:15px;
+  font-size:18px;
+}
+
+/* GRID */
 .grid{
   display:grid;
   grid-template-columns: repeat(12, 22px);
-  gap:5px;
+  gap:6px;
   justify-content:center;
+  margin-top:15px;
 }
+
 .cell{
   width:22px;
   height:22px;
   border-radius:50%;
 }
 
-/* ALERT */
-.good{background:#4CAF50;padding:10px;border-radius:8px;}
-.warn{background:#ff9800;color:#000;padding:10px;border-radius:8px;}
-.danger{background:#f44336;padding:10px;border-radius:8px;}
+/* FOOT */
+.footer{
+  margin:20px;
+}
+
+.btn2{
+  padding:12px 25px;
+  border:none;
+  border-radius:12px;
+  margin:5px;
+  font-size:16px;
+}
+
+/* WARN */
+.warn{
+  background:#ff9800;
+  color:#000;
+  padding:10px;
+  border-radius:10px;
+  margin-top:10px;
+}
 
 </style>
 </head>
@@ -70,49 +126,70 @@ body{
 
 <div class="header">🔥 BACCARAT AI ULTRA</div>
 
-<div style="display:flex;justify-content:center;flex-wrap:wrap;">
-  <button class="btn b" onclick="add('B')">BANKER</button>
-  <button class="btn t" onclick="add('T')">TIE</button>
-  <button class="btn p" onclick="add('P')">PLAYER</button>
+<div class="wrap">
+  <button class="btn blue" onclick="add('P')">XANH<br>(PLAYER)</button>
+  <button class="btn green" onclick="add('T')">XANH LÁ<br>(TIE)</button>
+  <button class="btn red" onclick="add('B')">ĐỎ<br>(BANKER)</button>
 </div>
 
 <div class="box">
-  <div id="result">Đang phân tích...</div>
+  🤖 AI ĐANG PHÂN TÍCH...
+  <div class="result" id="result">⏳ CHỜ THÊM DỮ LIỆU</div>
+  <div class="sub">Nhập kết quả để AI dự đoán chính xác hơn</div>
+
+  <div class="stats">
+    <div style="color:#1e88e5">XANH <br><span id="p">0%</span></div>
+    <div style="color:#e53935">ĐỎ <br><span id="b">0%</span></div>
+    <div style="color:#ffeb3b">BỆT <br><span id="streak">0</span></div>
+  </div>
+
   <div id="warn"></div>
 </div>
 
 <div class="grid" id="grid"></div>
 
-<div style="margin-top:10px">
-  <button onclick="undo()">Undo</button>
-  <button onclick="reset()">Reset</button>
+<div class="footer">
+  <button class="btn2" onclick="undo()">↩️ Hoàn tác</button>
+  <button class="btn2" onclick="reset()">🔄 Reset</button>
 </div>
 
 <script>
 let data = JSON.parse(localStorage.getItem("bac")||"[]");
 
-function save(){localStorage.setItem("bac",JSON.stringify(data));}
-function add(x){data.push(x); if(data.length>150)data.shift(); save(); render();}
-function undo(){data.pop(); save(); render();}
-function reset(){data=[]; save(); render();}
+function save(){
+  localStorage.setItem("bac",JSON.stringify(data));
+}
 
-/* ===== AI ULTRA ===== */
+function add(x){
+  data.push(x);
+  if(data.length>120)data.shift();
+  save();
+  render();
+}
+
+function undo(){
+  data.pop();
+  save();
+  render();
+}
+
+function reset(){
+  data=[];
+  save();
+  render();
+}
+
 function analyze(){
+  let last=data.slice(-20);
 
-  let clean = data.filter(x=>x!="T");
+  let p=last.filter(x=>x=="P").length;
+  let b=last.filter(x=>x=="B").length;
+  let total=p+b;
 
-  if(clean.length<6){
-    return ["⏳ CHỜ THÊM", "", ""];
-  }
+  if(total==0)return [0,0,"⏳ CHỜ THÊM",0,""];
 
-  let last20 = clean.slice(-20);
-  let last10 = clean.slice(-10);
-
-  let b20 = last20.filter(x=>x=="B").length;
-  let p20 = last20.filter(x=>x=="P").length;
-
-  let pb = p20/(b20+p20);
-  let bb = 1-pb;
+  let pp=Math.round(p/total*100);
+  let bb=100-pp;
 
   /* streak */
   let streak=1;
@@ -121,62 +198,42 @@ function analyze(){
     else break;
   }
 
-  /* chop */
-  let change=0;
-  for(let i=1;i<last20.length;i++){
-    if(last20[i]!=last20[i-1]) change++;
-  }
-  let chop = change/last20.length;
-
-  let result="❌ BỎ";
+  let result="⏳ CHỜ";
   let warn="";
-  let type="";
 
-  /* danger */
-  if(streak>=5){
-    warn="🚨 Bệt dài → dễ gãy mạnh";
-    type="danger";
+  if(streak>=4){
+    warn="⚠️ Cầu bệt "+streak+" → dễ gãy!";
   }
 
-  if(chop>0.6){
-    warn="⚠️ Cầu loạn → KHÔNG NÊN ĐÁNH";
-    type="warn";
-    return ["❌ BỎ", warn, type];
+  if(pp>65){
+    result="🔥 XANH MẠNH (PLAYER)";
   }
-
-  /* quyết định */
-  if(pb>0.7 && last10.filter(x=>"P").length>=6){
-    result="🔥 PLAYER MẠNH";
-    type="good";
-  }
-  else if(bb>0.7 && last10.filter(x=>"B").length>=6){
-    result="🔥 BANKER MẠNH";
-    type="good";
+  else if(bb>65){
+    result="🔥 ĐỎ MẠNH (BANKER)";
   }
   else if(streak>=3){
-    result="⚡ THEO CẦU " + data[data.length-1];
-  }
-  else if(pb>0.6){
-    result="👉 NGHIÊNG PLAYER";
-  }
-  else if(bb>0.6){
-    result="👉 NGHIÊNG BANKER";
+    result="⚡ Theo cầu: "+(data[data.length-1]=="P"?"XANH":"ĐỎ");
   }
 
-  return [result,warn,type];
+  return [pp,bb,result,streak,warn];
 }
 
-/* RENDER */
 function render(){
+  let [pp,bb,res,streak,warn]=analyze();
 
-  let [r,w,t]=analyze();
+  document.getElementById("p").innerText=pp+"%";
+  document.getElementById("b").innerText=bb+"%";
+  document.getElementById("streak").innerText=streak;
+  document.getElementById("result").innerText=res;
 
-  document.getElementById("result").innerText=r;
-
-  let warnBox=document.getElementById("warn");
-  warnBox.className="";
-  if(t) warnBox.classList.add(t);
-  warnBox.innerText=w||"";
+  let w=document.getElementById("warn");
+  if(warn){
+    w.className="warn";
+    w.innerText=warn;
+  }else{
+    w.className="";
+    w.innerText="";
+  }
 
   let grid=document.getElementById("grid");
   grid.innerHTML="";
@@ -185,9 +242,9 @@ function render(){
     let d=document.createElement("div");
     d.className="cell";
 
-    if(x=="B") d.style.background="#2196F3";
-    if(x=="P") d.style.background="#f44336";
-    if(x=="T") d.style.background="#4CAF50";
+    if(x=="P") d.style.background="#1e88e5";
+    if(x=="B") d.style.background="#e53935";
+    if(x=="T") d.style.background="#43a047";
 
     grid.appendChild(d);
   });
